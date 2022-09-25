@@ -100,7 +100,7 @@ pub mod monad {
 }
 
 /// # Implementing a trait for a type with macro
-/// 
+///
 /// Implement a repeated `impl` using a `macro_rules`.
 pub mod impl_macro {
     /// `Foo` trait, generic `T`
@@ -119,7 +119,7 @@ pub mod impl_macro {
             $(
                 impl Foo<$t> for MyStruct<$t> {
                     type Output = $t;
-        
+
                     fn foo(&self, x: $t) -> Self::Output {
                         self.0 + x
                     }
@@ -136,7 +136,6 @@ pub mod impl_macro {
     pub fn x() -> impl Foo<usize, Output = usize> {
         MyStruct(42)
     }
-
 }
 
 #[macro_export]
