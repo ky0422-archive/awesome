@@ -2,6 +2,7 @@
 
 -   Overriding Function
 -   Monad
+-   `impl` with macro
 -   `linq` Macro
 
 ... more will be added soon.
