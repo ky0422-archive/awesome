@@ -64,7 +64,7 @@ pub mod overloading {
 /// # Monad
 ///
 /// Monad is a typical functional programming languages. See [here](https://en.wikipedia.org/wiki/Monad_(functional_programming)) for more details.
-mod monad {
+pub mod monad {
     /// A simple monad implementation.
     ///
     /// It takes types `T` and `E`, which can be implemented in `Option<T>`, `Result<T, E>`, etc.
@@ -99,11 +99,46 @@ mod monad {
     }
 }
 
-/// The `linq` macro takes two patterns.
-///
-/// > `from <ident> in <expr>; select <expr>`: `from` is the name of the variable to be iterated, `select` is the expression to be evaluated.
-///
-/// > `from <ident> in <expr>; where <expr>; select <expr>`: `from` is the name of the variable to be iterated, `where` is the condition to be evaluated, `select` is the expression to be evaluated.
+/// # Implementing a trait for a type with macro
+/// 
+/// Implement a repeated `impl` using a `macro_rules`.
+pub mod impl_macro {
+    /// `Foo` trait, generic `T`
+    pub trait Foo<T> {
+        /// The return type of the function.
+        type Output;
+        /// `foo` function, `x` is a parameter of type `T`. it returns `Output`.
+        fn foo(&self, x: T) -> Self::Output;
+    }
+
+    pub struct MyStruct<T>(pub T);
+
+    /// Keywords cannot be used as identifiers, but can be decalred using `r#` prefix.
+    macro_rules! r#impl {
+        ($($t:ty /* `ty` is `type` */)*) => {
+            $(
+                impl Foo<$t> for MyStruct<$t> {
+                    type Output = $t;
+        
+                    fn foo(&self, x: $t) -> Self::Output {
+                        self.0 + x
+                    }
+                }
+            )*
+        };
+    }
+
+    // `{ }` can omit the semicolon.
+    //
+    // https://play.rust-lang.org/?gist=dee6113358f0390a3a353b3dd95e411f
+    r#impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 }
+
+    pub fn x() -> impl Foo<usize, Output = usize> {
+        MyStruct(42)
+    }
+
+}
+
 #[macro_export]
 macro_rules! linq {
     (from $r:ident in $d:expr; select $s:expr;) => {
@@ -134,6 +169,13 @@ mod tests {
         let (mul_5, div_10) = (|x: usize| Some(x * 5), |x: usize| Some(x / 10));
 
         assert_eq!(Some(10).bind(mul_5).bind(div_10), Some(5));
+    }
+
+    #[test]
+    fn impl_macro_test() {
+        use crate::impl_macro::*;
+
+        assert_eq!(impl_macro::x().foo(8), 50);
     }
 
     #[test]
